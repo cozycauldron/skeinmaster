@@ -30,7 +30,9 @@ export const endpoint = <
       }
 
       // TODO: IAM Check
-      const eventBody = req.method === "GET" ? req.query : req.body;
+      // const eventBody = req.method === "GET" ? req.query : req.body;
+      const eventBody = { ...req.query, ...req.body };
+
       const validPayload = await schema.parseAsync(eventBody);
 
       return await fn({

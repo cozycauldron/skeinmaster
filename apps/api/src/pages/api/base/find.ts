@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { endpoint } from "../../../utils/endpoint";
 import { prisma } from "../../../utils/prisma";
-import { Fibers } from "../../../types/enums";
 
 export default endpoint(
   z.object({

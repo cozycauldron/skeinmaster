@@ -4,17 +4,18 @@ import { prisma } from "../../../utils/prisma";
 
 export default endpoint(
   z.object({
-    id: z.string().min(1),
+    // TODO: Add Advanced filtering
+    name: z.string().optional(),
   }),
   async ({ payload, res }) => {
-    const base = await prisma.yarnBase.findFirst({
+    const mills = await prisma.mill.findMany({
       where: {
-        id: payload.id,
+        name: payload.name ? { contains: payload.name } : undefined,
       },
     });
 
     return res.status(200).json({
-      base,
+      mills,
     });
   }
 );

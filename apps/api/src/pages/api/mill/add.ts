@@ -2,7 +2,7 @@ import { z } from "zod";
 import { endpoint } from "../../../utils/endpoint";
 import { prisma } from "../../../utils/prisma";
 
-export const add = endpoint(
+export default endpoint(
   z.object({
     name: z.string().min(1),
     id: z.string().min(1),
@@ -24,5 +24,3 @@ export const add = endpoint(
     });
   }
 );
-
-export default add;
