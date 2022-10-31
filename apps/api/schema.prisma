@@ -1,0 +1,106 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  shadowDatabaseUrl    = env("SHADOW_DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+// ========================
+// Models
+// ========================
+
+// Mill sells several yarn bases
+// User buys several yarn bases
+// User formulates recipes (independent of yarn base?)
+// User can sell on several (not all) yarn bases
+//  - Can sell individual "single" bases or sets (sock sets, mini skein sets, etc)
+//  - Sets
+//  - An order can have multiple single base yarns or base sets
+//  - An order can have multiple dyes
+//
+
+model Mill {
+  id        String     @id @default(cuid())
+  name      String     @unique @db.VarChar(255)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  phone     String?    @db.VarChar(255)
+  location  String?
+  owner     String?    @db.VarChar(255)
+  bases     YarnBase[]
+}
+
+model YarnBase {
+  id        String      @id @default(cuid())
+  millId    String
+  mill      Mill        @relation(fields: [millId], references: [id])
+  name      String      @db.VarChar(255)
+  grams     Int         @default(100)
+  yards     Int
+  ply       Int
+  DyedSkein DyedSkein[]
+  User      User?       @relation(fields: [userId], references: [id])
+  userId    String?
+}
+
+model Colorway {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // TODO: Track dyes that go into colorways and manage dye inventory
+  name      String
+  notes     String
+  userId    String
+  DyedSkein DyedSkein[]
+}
+
+model DyedSkein {
+  @@unique([userId, sku])
+  // Price is managed at listing level, not dyed skein level
+  sku        String @db.VarChar(255)
+  userId     String
+  baseId     String
+  colorwayId String
+  listingId  String?
+  user      User     @relation(fields: [userId], references: [id])
+  base      YarnBase @relation(fields: [baseId], references: [id])
+  colorway  Colorway @relation(fields: [colorwayId], references: [id])
+  Listing   Listing? @relation(fields: [listingId], references: [id])
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  description String   @default("")
+  etsyUrl     String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name   String
+  userId String
+  price Float
+  // Sets (Sock sets, mini sets, etc require this be an array rather than a single string)
+  items DyedSkein[]
+}
+
+model User {
+  id        String      @id @default(cuid())
+  email     String      @unique @db.VarChar(255)
+  role      String      @default("user")
+  name      String?     @db.VarChar(255)
+  colorways Colorway[]
+  bases     YarnBase[]
+  listings  Listing[]
+  skeins    DyedSkein[]
+}
+
+enum OrderDyedBaseStatus {
+  TODO
+  DOING
+  DONE
+}

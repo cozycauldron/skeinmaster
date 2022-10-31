@@ -4,7 +4,8 @@ export default function Web() {
   return (
     <div>
       <h1>Web</h1>
-      <Button />
+      <Button text="foo" />
+      <Button secondary text="bar" />
     </div>
   );
 }
